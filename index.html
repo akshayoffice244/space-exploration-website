@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cosmic Odyssey | Mobile Solar System with Scroll</title>
+    <title>Cosmic Odyssey | Fully Scrollable Solar System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            cursor: default;
             -webkit-tap-highlight-color: transparent;
         }
         body {
@@ -20,6 +19,7 @@
             overflow-y: auto;
             scroll-behavior: smooth;
         }
+        /* Canvas container: full viewport height, but allows vertical scroll via touch-action */
         #canvas-container {
             position: relative;
             width: 100%;
@@ -27,7 +27,8 @@
             overflow: hidden;
             background: radial-gradient(circle at center, #05051a 0%, #000000 100%);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            touch-action: auto; /* Let us handle touch gestures manually */
+            /* Crucial: allows vertical swipes to scroll the page, while horizontal can be captured */
+            touch-action: pan-y pinch-zoom;
         }
         canvas {
             display: block;
@@ -236,7 +237,6 @@
             pointer-events: none;
             z-index: 10;
         }
-        /* Scroll indicator */
         .scroll-hint {
             position: absolute;
             bottom: 80px;
@@ -261,9 +261,9 @@
 <body>
 <div id="canvas-container"></div>
 <div class="hero-title">
-    🌌 MOBILE SOLAR SYSTEM | <span>DRAG TO ROTATE • SCROLL TO EXPLORE</span> 🪐
+    🌌 FULLY SCROLLABLE | <span>SWIPE UP TO SCROLL</span> | SIDEWAYS TO ROTATE 🪐
 </div>
-<div class="scroll-hint" id="scrollHint">⬅️ Drag to rotate / zoom &nbsp;&nbsp;|&nbsp;&nbsp; ⬆️ Swipe up to scroll</div>
+<div class="scroll-hint" id="scrollHint">⬆️ Swipe vertically to scroll &nbsp;&nbsp;|&nbsp;&nbsp; ➡️ Swipe horizontally to rotate view</div>
 <div class="loading-hint" id="loadingHint">🪐 Loading textures...</div>
 <div class="fact-card" id="factCard">
     <h4 id="planetName">✨ Deep Space</h4>
@@ -275,7 +275,7 @@
     <section class="section parallax-bg">
         <div class="container">
             <h2>⚡ BEYOND THE STARS ⚡</h2>
-            <p class="glow-text">Explore the solar system on your phone — touch, drag, zoom. Real textures, orbiting moons, and Saturn's elegant rings.</p>
+            <p class="glow-text">Explore the solar system on your phone — drag to rotate, pinch to zoom, and swipe up to scroll down for more content.</p>
             <a href="#explore" class="btn" id="scrollBtn">🚀 DISCOVER MORE</a>
         </div>
     </section>
@@ -283,7 +283,7 @@
         <div class="container">
             <h2>🪐 COSMIC WONDERS</h2>
             <div class="cards">
-                <div class="card"><h3>✨ Mobile Ready</h3><p>Fully responsive canvas with touch controls. Pinch to zoom, drag to rotate.</p></div>
+                <div class="card"><h3>✨ Scroll Friendly</h3><p>Vertical swipes scroll the page, horizontal swipes rotate the solar system. Best of both worlds.</p></div>
                 <div class="card"><h3>🌕 Earth's Moon</h3><p>Our natural satellite orbits realistically. Tap or hover for facts.</p></div>
                 <div class="card"><h3>🔭 Elegant Rings</h3><p>Saturn's thin, translucent ring — clean and beautiful on any screen.</p></div>
             </div>
@@ -296,7 +296,7 @@
             <div style="margin-top: 20px; font-size: 0.8rem;">✨ Smooth Scrolling | Touch Parallax | Live Orrery ✨</div>
         </div>
     </section>
-    <footer><p>© 2026 Cosmic Odyssey — Mobile Optimized with Scroll</p></footer>
+    <footer><p>© 2026 Cosmic Odyssey — Fully Scrollable on Mobile | Three.js</p></footer>
 </main>
 
 <script type="importmap">
@@ -345,44 +345,68 @@
     controls.touchRotate = true;
     controls.touchZoom = true;
     
-    // ----- FIX MOBILE SCROLLING -----
-    // We need to allow vertical page scroll when user swipes up/down,
-    // but still allow camera rotation/zoom with horizontal or two-finger gestures.
+    // ----- FIX: Ensure vertical swipes scroll the page, horizontal swipes rotate -----
     if (isMobile) {
-        let touchStartY = 0;
-        let touchMoveY = 0;
-        let isScrolling = false;
+        let touchStartX = 0, touchStartY = 0;
+        let isVerticalSwipe = false;
+        let touchMoved = false;
         
+        // Disable OrbitControls during vertical swipe detection
         renderer.domElement.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-            isScrolling = false;
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                isVerticalSwipe = false;
+                touchMoved = false;
+                controls.enabled = true; // initially enabled
+            }
         }, { passive: false });
         
         renderer.domElement.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            const deltaY = Math.abs(touch.clientY - touchStartY);
-            const deltaX = Math.abs(touch.clientX - touchStartY);
-            // If movement is primarily vertical (more than 2x horizontal) and not a two-finger gesture,
-            // then we consider it as scrolling intent.
-            if (e.touches.length === 1 && deltaY > deltaX * 1.5 && deltaY > 15) {
-                isScrolling = true;
-                // Allow default scroll behavior
+            if (e.touches.length !== 1) {
+                // Multi-touch (pinch/zoom) - let controls handle it
+                controls.enabled = true;
                 return;
             }
-            if (!isScrolling && e.touches.length === 1) {
-                // For horizontal or mixed movement, prevent default so OrbitControls can work
+            
+            const deltaX = e.touches[0].clientX - touchStartX;
+            const deltaY = e.touches[0].clientY - touchStartY;
+            const absDeltaX = Math.abs(deltaX);
+            const absDeltaY = Math.abs(deltaY);
+            
+            // Detect if movement is primarily vertical (more than 1.5x horizontal and > 10px)
+            if (absDeltaY > absDeltaX * 1.5 && absDeltaY > 10) {
+                isVerticalSwipe = true;
+                controls.enabled = false;  // Disable orbit controls to allow scrolling
+                // Do NOT call preventDefault - let the browser scroll the page
+                return;
+            } else if (absDeltaX > absDeltaY * 1.2 && absDeltaX > 10) {
+                // Horizontal swipe: enable controls and prevent default
+                isVerticalSwipe = false;
+                controls.enabled = true;
                 e.preventDefault();
+                return;
             }
+            
+            // Small movements: keep as is, but don't block
+            if (!isVerticalSwipe) {
+                controls.enabled = true;
+            }
+            touchMoved = true;
         }, { passive: false });
         
         renderer.domElement.addEventListener('touchend', () => {
-            isScrolling = false;
+            // Re-enable controls after a short delay
+            setTimeout(() => { controls.enabled = true; }, 150);
+            isVerticalSwipe = false;
         });
         
-        // Also ensure that two-finger gestures always work
-        renderer.domElement.addEventListener('touchstart', (e) => {
-            if (e.touches.length >= 2) {
-                e.preventDefault();
+        // Also ensure that scrolling with fingers on canvas doesn't get blocked
+        // The CSS `touch-action: pan-y` already helps, but we also need to make sure
+        // that when user is scrolling, we don't interfere.
+        window.addEventListener('scroll', () => {
+            if (!controls.enabled) {
+                setTimeout(() => { controls.enabled = true; }, 100);
             }
         });
     }
@@ -777,7 +801,7 @@
     
     animate();
     factCard.classList.remove('active');
-    console.log('✅ Mobile solar system with proper scrolling');
+    console.log('✅ Mobile solar system: vertical scroll works, horizontal rotation works');
 </script>
 </body>
 </html>
