@@ -2,20 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cosmic Odyssey | Mercury Fixed (Less Bright)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cosmic Odyssey | Mobile Solar System with Scroll</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             cursor: default;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             font-family: 'Poppins', 'Segoe UI', sans-serif;
             background-color: #03030f;
             color: #ffffff;
             overflow-x: hidden;
+            overflow-y: auto;
             scroll-behavior: smooth;
         }
         #canvas-container {
@@ -25,28 +27,31 @@
             overflow: hidden;
             background: radial-gradient(circle at center, #05051a 0%, #000000 100%);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            touch-action: auto; /* Let us handle touch gestures manually */
         }
         canvas {
             display: block;
             outline: none;
+            width: 100%;
+            height: 100%;
         }
         .hero-title {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
             left: 0;
             right: 0;
             text-align: center;
             z-index: 10;
             pointer-events: none;
             backdrop-filter: blur(4px);
-            background: rgba(0,0,0,0.5);
-            padding: 12px 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 12px;
             border-radius: 40px;
-            width: fit-content;
+            width: 90%;
             margin: 0 auto;
             font-weight: 500;
-            letter-spacing: 2px;
-            font-size: 0.9rem;
+            letter-spacing: 1px;
+            font-size: 0.7rem;
             border: 1px solid rgba(255,255,255,0.2);
         }
         .hero-title span {
@@ -55,16 +60,17 @@
         }
         .fact-card {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(5, 5, 20, 0.85);
+            bottom: 20px;
+            right: 20px;
+            left: 20px;
+            background: rgba(5, 5, 20, 0.9);
             backdrop-filter: blur(12px);
-            border-radius: 24px;
-            padding: 18px 24px;
-            max-width: 320px;
-            border-left: 4px solid #ffaa33;
+            border-radius: 20px;
+            padding: 12px 16px;
+            max-width: none;
+            border-left: 3px solid #ffaa33;
             border-right: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
             z-index: 100;
             font-family: 'Poppins', monospace;
@@ -77,20 +83,20 @@
             transform: translateY(0);
         }
         .fact-card h4 {
-            font-size: 1.3rem;
-            margin-bottom: 8px;
+            font-size: 1rem;
+            margin-bottom: 5px;
             color: #ffcc66;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         .fact-card p {
-            font-size: 0.85rem;
-            line-height: 1.4;
+            font-size: 0.7rem;
+            line-height: 1.3;
             color: #e0e0ff;
         }
         .fact-card small {
             display: block;
-            margin-top: 8px;
-            font-size: 0.7rem;
+            margin-top: 6px;
+            font-size: 0.6rem;
             color: #aaaaff;
         }
         .content-section {
@@ -100,109 +106,96 @@
             backdrop-filter: blur(2px);
         }
         .parallax-bg {
-            background-attachment: fixed;
+            background-attachment: scroll;
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
         }
         .section {
-            padding: 100px 20px;
+            padding: 60px 16px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
         }
         .section:nth-child(1) {
             background-image: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6)), url('https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
-            background-attachment: fixed;
+            background-attachment: scroll;
             background-size: cover;
-            background-position: center;
         }
         .section:nth-child(2) {
             background: radial-gradient(ellipse at top, #0a0a2a, #010105);
         }
         .section:nth-child(3) {
             background-image: linear-gradient(45deg, #03030fcc, #0a0a2acc), url('https://images.pexels.com/photos/1169754/pexels-photo-1169754.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
-            background-attachment: fixed;
+            background-attachment: scroll;
             background-size: cover;
         }
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 16px;
         }
         h2 {
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 1.8rem;
+            margin-bottom: 16px;
             background: linear-gradient(135deg, #fff, #88aaff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
         .cards {
             display: flex;
             flex-wrap: wrap;
-            gap: 30px;
+            gap: 20px;
             justify-content: center;
-            margin-top: 50px;
+            margin-top: 30px;
         }
         .card {
             background: rgba(10, 10, 30, 0.7);
             backdrop-filter: blur(8px);
-            border-radius: 32px;
-            padding: 30px 25px;
-            width: 280px;
-            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.3s;
+            border-radius: 24px;
+            padding: 20px 16px;
+            width: 100%;
+            max-width: 280px;
+            transition: transform 0.3s ease;
             border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-        }
-        .card:hover {
-            transform: translateY(-12px);
-            border-color: #ffaa55;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.5);
         }
         .card h3 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
             color: #ffcc88;
         }
         .card p {
-            font-size: 1rem;
-            line-height: 1.5;
+            font-size: 0.85rem;
+            line-height: 1.4;
             color: #ddd;
         }
         .glow-text {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             margin-top: 20px;
             color: #ccddff;
         }
         .btn {
             display: inline-block;
-            margin-top: 30px;
-            padding: 12px 30px;
+            margin-top: 20px;
+            padding: 10px 24px;
             background: linear-gradient(90deg, #ffaa33, #ff7733);
             border-radius: 60px;
             color: #000;
             font-weight: bold;
             text-decoration: none;
             transition: all 0.3s;
-            box-shadow: 0 0 15px rgba(255,170,51,0.5);
-        }
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px #ffaa55;
+            font-size: 0.9rem;
         }
         footer {
             background: #010108;
             text-align: center;
-            padding: 30px;
-            font-size: 0.8rem;
+            padding: 20px;
+            font-size: 0.7rem;
             color: #88aaff;
-            border-top: 1px solid #1a1a3a;
         }
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 4px;
         }
         ::-webkit-scrollbar-track {
             background: #03030f;
@@ -211,33 +204,70 @@
             background: #ffaa55;
             border-radius: 10px;
         }
-        @media (max-width: 750px) {
-            .fact-card { max-width: 260px; padding: 12px 18px; bottom: 15px; right: 15px; }
-            h2 { font-size: 2rem; }
-            .card { width: 100%; max-width: 320px; }
+        @media (min-width: 768px) {
+            .fact-card {
+                bottom: 30px;
+                right: 30px;
+                left: auto;
+                max-width: 320px;
+                padding: 18px 24px;
+            }
+            .fact-card h4 { font-size: 1.3rem; }
+            .fact-card p { font-size: 0.85rem; }
+            .fact-card small { font-size: 0.7rem; }
+            .hero-title {
+                width: auto;
+                font-size: 0.9rem;
+                bottom: 30px;
+                padding: 12px 20px;
+            }
+            h2 { font-size: 3rem; }
+            .card { width: 280px; padding: 30px 25px; }
+            .section { padding: 100px 20px; }
         }
         .loading-hint {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             background: rgba(0,0,0,0.5);
             padding: 4px 10px;
             border-radius: 20px;
             pointer-events: none;
             z-index: 10;
         }
+        /* Scroll indicator */
+        .scroll-hint {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.6rem;
+            color: #ffcc88;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        @media (max-width: 768px) {
+            .scroll-hint {
+                bottom: 70px;
+            }
+        }
     </style>
 </head>
 <body>
 <div id="canvas-container"></div>
 <div class="hero-title">
-    🌌 MERCURY FIXED (LESS BRIGHT) | REAL SUN | <span>HOVER OVER PLANETS & MOON</span>
+    🌌 MOBILE SOLAR SYSTEM | <span>DRAG TO ROTATE • SCROLL TO EXPLORE</span> 🪐
 </div>
-<div class="loading-hint" id="loadingHint">🪐 Loading textures — Mercury now darker...</div>
+<div class="scroll-hint" id="scrollHint">⬅️ Drag to rotate / zoom &nbsp;&nbsp;|&nbsp;&nbsp; ⬆️ Swipe up to scroll</div>
+<div class="loading-hint" id="loadingHint">🪐 Loading textures...</div>
 <div class="fact-card" id="factCard">
     <h4 id="planetName">✨ Deep Space</h4>
-    <p id="factText">Hover over any celestial body to uncover space secrets.</p>
+    <p id="factText">Tap or hover on planets to see facts.</p>
     <small>🛸 Cosmic Discovery</small>
 </div>
 
@@ -245,7 +275,7 @@
     <section class="section parallax-bg">
         <div class="container">
             <h2>⚡ BEYOND THE STARS ⚡</h2>
-            <p class="glow-text">Embark on a journey through our cosmic neighborhood. Scroll to explore the infinite void, where every planet tells a story.</p>
+            <p class="glow-text">Explore the solar system on your phone — touch, drag, zoom. Real textures, orbiting moons, and Saturn's elegant rings.</p>
             <a href="#explore" class="btn" id="scrollBtn">🚀 DISCOVER MORE</a>
         </div>
     </section>
@@ -253,20 +283,20 @@
         <div class="container">
             <h2>🪐 COSMIC WONDERS</h2>
             <div class="cards">
-                <div class="card"><h3>✨ Real Textures</h3><p>High-resolution surface maps for every planet — from Mercury's craters to Neptune's azure storms.</p></div>
-                <div class="card"><h3>🌕 Earth's Moon</h3><p>Our natural satellite orbits realistically with a procedural texture. Hover for facts!</p></div>
-                <div class="card"><h3>🔭 Elegant Ring</h3><p>Saturn's thin, translucent ring with a warm golden hue — clean and realistic.</p></div>
+                <div class="card"><h3>✨ Mobile Ready</h3><p>Fully responsive canvas with touch controls. Pinch to zoom, drag to rotate.</p></div>
+                <div class="card"><h3>🌕 Earth's Moon</h3><p>Our natural satellite orbits realistically. Tap or hover for facts.</p></div>
+                <div class="card"><h3>🔭 Elegant Rings</h3><p>Saturn's thin, translucent ring — clean and beautiful on any screen.</p></div>
             </div>
         </div>
     </section>
     <section class="section">
         <div class="container">
             <h2>🚀 THE FUTURE OF EXPLORATION</h2>
-            <p class="glow-text">NASA's Artemis, Mars missions, and interstellar dreams — the next giant leap awaits. <br> This interactive 3D solar system is a tribute to human curiosity.</p>
-            <div style="margin-top: 40px; font-size: 0.9rem; letter-spacing: 1px;">✨ Smooth Scrolling | Stellar Parallax | Live Orrery ✨</div>
+            <p class="glow-text">NASA's Artemis, Mars missions, and interstellar dreams — the next giant leap awaits.</p>
+            <div style="margin-top: 20px; font-size: 0.8rem;">✨ Smooth Scrolling | Touch Parallax | Live Orrery ✨</div>
         </div>
     </section>
-    <footer><p>© 2026 Cosmic Odyssey — Mercury Brightness Fixed | Three.js Experience</p></footer>
+    <footer><p>© 2026 Cosmic Odyssey — Mobile Optimized with Scroll</p></footer>
 </main>
 
 <script type="importmap">
@@ -288,51 +318,101 @@
     scene.fog = new THREE.FogExp2(0x010118, 0.0004);
     
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 6, 19);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        camera.position.set(0, 5, 16);
+    } else {
+        camera.position.set(0, 6, 19);
+    }
     camera.lookAt(0, 0, 0);
     
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.shadowMap.enabled = true;
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
     
+    // OrbitControls with custom touch handling to allow vertical scroll
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.autoRotate = false;
     controls.enableZoom = true;
     controls.enablePan = true;
-    controls.zoomSpeed = 1.2;
+    controls.zoomSpeed = 1.0;
     controls.rotateSpeed = 0.8;
     controls.target.set(0, 0, 0);
+    controls.touchRotate = true;
+    controls.touchZoom = true;
+    
+    // ----- FIX MOBILE SCROLLING -----
+    // We need to allow vertical page scroll when user swipes up/down,
+    // but still allow camera rotation/zoom with horizontal or two-finger gestures.
+    if (isMobile) {
+        let touchStartY = 0;
+        let touchMoveY = 0;
+        let isScrolling = false;
+        
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            isScrolling = false;
+        }, { passive: false });
+        
+        renderer.domElement.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            const deltaY = Math.abs(touch.clientY - touchStartY);
+            const deltaX = Math.abs(touch.clientX - touchStartY);
+            // If movement is primarily vertical (more than 2x horizontal) and not a two-finger gesture,
+            // then we consider it as scrolling intent.
+            if (e.touches.length === 1 && deltaY > deltaX * 1.5 && deltaY > 15) {
+                isScrolling = true;
+                // Allow default scroll behavior
+                return;
+            }
+            if (!isScrolling && e.touches.length === 1) {
+                // For horizontal or mixed movement, prevent default so OrbitControls can work
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        renderer.domElement.addEventListener('touchend', () => {
+            isScrolling = false;
+        });
+        
+        // Also ensure that two-finger gestures always work
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            if (e.touches.length >= 2) {
+                e.preventDefault();
+            }
+        });
+    }
     
     // ========== LIGHTING ==========
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambientLight);
     const hemiLight = new THREE.HemisphereLight(0x88aaff, 0xccaa88, 1.0);
     scene.add(hemiLight);
-    const sunLight = new THREE.PointLight(0xffaa66, 2.8, 45);
+    const sunLight = new THREE.PointLight(0xffaa66, 2.5, 45);
     sunLight.position.set(0, 0, 0);
     sunLight.decay = 1.0;
     sunLight.castShadow = true;
     scene.add(sunLight);
-    const frontFill = new THREE.DirectionalLight(0xffdd99, 1.3);
+    const frontFill = new THREE.DirectionalLight(0xffdd99, 1.2);
     frontFill.position.set(2, 3, 6);
     scene.add(frontFill);
-    const bottomFill = new THREE.PointLight(0xccaa88, 0.7);
+    const bottomFill = new THREE.PointLight(0xccaa88, 0.6);
     bottomFill.position.set(0, -4, 0);
     scene.add(bottomFill);
-    const sideRim = new THREE.DirectionalLight(0xffaa88, 0.6);
+    const sideRim = new THREE.DirectionalLight(0xffaa88, 0.5);
     sideRim.position.set(4, 1, -3);
     scene.add(sideRim);
-    const cameraLight = new THREE.PointLight(0xffccaa, 0.8);
+    const cameraLight = new THREE.PointLight(0xffccaa, 0.7);
     cameraLight.position.set(0, 2, 5);
     scene.add(cameraLight);
     
     // ========== STARS ==========
     const starGeo = new THREE.BufferGeometry();
-    const starCount = 3000;
+    const starCount = 2500;
     const starPos = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
         starPos[i*3] = (Math.random() - 0.5) * 600;
@@ -344,8 +424,8 @@
     scene.add(stars);
     
     const starGeo2 = new THREE.BufferGeometry();
-    const starPos2 = new Float32Array(1800 * 3);
-    for (let i = 0; i < 1800; i++) {
+    const starPos2 = new Float32Array(1500 * 3);
+    for (let i = 0; i < 1500; i++) {
         starPos2[i*3] = (Math.random() - 0.5) * 800;
         starPos2[i*3+1] = (Math.random() - 0.5) * 400;
         starPos2[i*3+2] = (Math.random() - 0.5) * 200 - 100;
@@ -361,7 +441,7 @@
     const sunCtx = sunCanvas.getContext('2d');
     sunCtx.fillStyle = '#ffaa44';
     sunCtx.fillRect(0, 0, sunCanvas.width, sunCanvas.height);
-    for (let i = 0; i < 3500; i++) {
+    for (let i = 0; i < 3000; i++) {
         sunCtx.fillStyle = `rgba(255, ${150 + Math.random() * 105}, ${50 + Math.random() * 80}, ${0.5 + Math.random() * 0.5})`;
         const x = Math.random() * sunCanvas.width;
         const y = Math.random() * sunCanvas.height;
@@ -370,7 +450,7 @@
         sunCtx.arc(x, y, r, 0, Math.PI * 2);
         sunCtx.fill();
     }
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 50; i++) {
         sunCtx.fillStyle = `rgba(80, 40, 20, 0.35)`;
         const x = Math.random() * sunCanvas.width;
         const y = Math.random() * sunCanvas.height;
@@ -384,13 +464,13 @@
         map: sunTexture,
         color: 0xffaa66,
         emissive: 0xff4422,
-        emissiveIntensity: 1.0,
+        emissiveIntensity: 0.9,
         roughness: 0.35,
         metalness: 0.05
     });
     const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(2.2, 128, 128), sunMat);
     scene.add(sunMesh);
-    const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(2.55, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff8844, transparent: true, opacity: 0.2, side: THREE.BackSide }));
+    const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(2.55, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff8844, transparent: true, opacity: 0.18, side: THREE.BackSide }));
     scene.add(sunGlow);
     
     // ========== PLANET TEXTURES ==========
@@ -461,14 +541,12 @@
         scene.add(orbit);
     }
     
-    // Create planets with Mercury fix
     planetsData.forEach(data => {
         let material;
         if (data.name === "MERCURY") {
-            // Mercury: darker color, higher roughness, less metalness
             material = new THREE.MeshStandardMaterial({
                 map: data.tex,
-                color: data.darkTint || 0x886644,
+                color: data.darkTint,
                 roughness: 0.85,
                 metalness: 0.02,
                 emissive: 0x000000
@@ -497,7 +575,7 @@
         addOrbit(data.radius);
     });
     
-    // ========== SATURN'S RING (restored thin, elegant) ==========
+    // Saturn's ring
     const saturn = planets.find(p => p.userData.name === "SATURN");
     let saturnRing = null;
     if (saturn) {
@@ -517,7 +595,7 @@
         saturn.add(saturnRing);
     }
     
-    // ========== MOON AROUND EARTH ==========
+    // Moon around Earth
     const earthPlanet = planets.find(p => p.userData.name === "EARTH");
     let moonMesh = null;
     let moonAngle = 0;
@@ -544,7 +622,7 @@
     
     // Asteroid belt
     const astGeo = new THREE.BufferGeometry();
-    const astCount = 1000;
+    const astCount = 800;
     const astPos = [];
     for (let i = 0; i < astCount; i++) {
         const r = 8.2 + Math.random() * 1.3;
@@ -558,7 +636,7 @@
     const asteroidField = new THREE.Points(astGeo, new THREE.PointsMaterial({ color: 0xaa8866, size: 0.06 }));
     scene.add(asteroidField);
     
-    // ========== RAYCASTER ==========
+    // ========== RAYCASTER (Touch + Mouse) ==========
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const factCard = document.getElementById('factCard');
@@ -566,10 +644,19 @@
     const factTextSpan = document.getElementById('factText');
     let currentHover = null;
     
-    window.addEventListener('mousemove', (event) => {
+    function handleIntersect(event) {
+        let clientX, clientY;
+        if (event.touches) {
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
         const rect = renderer.domElement.getBoundingClientRect();
-        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+        
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(planets);
         if (intersects.length) {
@@ -589,16 +676,20 @@
                 document.body.style.cursor = 'default';
             }
         }
-    });
+    }
+    
+    window.addEventListener('mousemove', handleIntersect);
+    window.addEventListener('touchmove', handleIntersect);
+    window.addEventListener('touchstart', handleIntersect);
     
     // ========== ANIMATION ==========
     let targetCamY = 0;
     let currentCamY = 0;
     window.addEventListener('scroll', () => {
         const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-        targetCamY = -scrollPercent * 1.2;
-        stars.position.y = scrollPercent * 1.5;
-        starsFar.position.y = -scrollPercent * 1.2;
+        targetCamY = -scrollPercent * 1.0;
+        stars.position.y = scrollPercent * 1.2;
+        starsFar.position.y = -scrollPercent * 1.0;
     });
     
     let lastTime = performance.now();
@@ -638,14 +729,14 @@
         
         const t = Date.now() * 0.002;
         cameraLight.position.x = Math.sin(t) * 1.2;
-        cameraLight.position.y = 2.5 + Math.cos(t * 0.7) * 0.6;
+        cameraLight.position.y = 2.5 + Math.cos(t * 0.7) * 0.5;
         
         stars.rotation.y += 0.0004;
         stars.rotation.x += 0.0002;
         starsFar.rotation.y -= 0.0003;
         
         currentCamY += (targetCamY - currentCamY) * 0.06;
-        camera.position.y = 6 + currentCamY * 0.9;
+        camera.position.y = (isMobile ? 5 : 6) + currentCamY * 0.8;
         controls.target.y = currentCamY * 0.4;
         controls.update();
         
@@ -675,11 +766,18 @@
         const hint = document.getElementById('loadingHint');
         if (hint) hint.style.opacity = '0';
         setTimeout(() => hint?.remove(), 1000);
+        const scrollHint = document.getElementById('scrollHint');
+        if (scrollHint) {
+            setTimeout(() => {
+                scrollHint.style.opacity = '0';
+                setTimeout(() => scrollHint.remove(), 500);
+            }, 5000);
+        }
     }, 3000);
     
     animate();
     factCard.classList.remove('active');
-    console.log('✅ Mercury brightness fixed (darker tint, higher roughness)');
+    console.log('✅ Mobile solar system with proper scrolling');
 </script>
 </body>
 </html>
